@@ -210,4 +210,232 @@ The Lambda deployment package was then rebuilt using the Python 3.13 environment
 
 ## 6. Deployment & Configuration
 
-AWS Lambda does not automa
+AWS Lambda does not automatically include third-party libraries such as `requests` and `mysql-connector-python`.
+
+The required dependencies were therefore packaged together with the Lambda function.
+
+```text
+lambda_function.py
+requests/
+mysql/
+urllib3/
+certifi/
+charset_normalizer/
+idna/
+...
+```
+
+The deployment package was created as a ZIP file and uploaded to Amazon S3.
+
+```bash
+zip -r ~/apart_cost_scraping.zip .
+zip -g apart_cost_scraping.zip lambda_function.py
+
+aws s3 cp apart_cost_scraping.zip s3://fc-storydata/
+```
+
+### Lambda Configuration
+
+```text
+Runtime:
+Python 3.13
+
+Handler:
+lambda_function.lambda_handler
+```
+
+The deployment package included Python 3.13-compatible dependencies, including the compiled MySQL Connector module.
+
+---
+
+## 7. Challenges & Solutions
+
+### Python Runtime Compatibility
+
+**Challenge:**
+The original project used Python 3.9 while the final Lambda environment used Python 3.13.
+
+**Solution:**
+A new Python 3.13 virtual environment was created, dependencies were reinstalled, and the Lambda deployment package was rebuilt.
+
+### Lambda Dependency Packaging
+
+**Challenge:**
+Third-party libraries were not included in the default Lambda runtime.
+
+**Solution:**
+Required dependencies were installed into the Python environment and packaged with the Lambda function.
+
+### Compiled Dependency Compatibility
+
+**Challenge:**
+`mysql-connector-python` contains compiled components that must be compatible with the Lambda runtime.
+
+**Solution:**
+The deployment package was rebuilt inside the Amazon Linux 2023 EC2 environment using Python 3.13.
+
+### Lambda Syntax Errors
+
+**Challenge:**
+Manual editing of the Lambda function caused string and indentation errors.
+
+**Solution:**
+The function was reformatted with consistent Python indentation and the API URL was corrected.
+
+### Database Connectivity
+
+**Challenge:**
+The Lambda function needed to connect to MariaDB hosted on Amazon RDS.
+
+**Solution:**
+The RDS connection configuration was validated and the final database insertion was verified using DataGrip.
+
+---
+
+## 8. Data Validation
+
+After successfully executing the Lambda function, the inserted records were checked in MariaDB using DataGrip.
+
+The validation confirmed the complete pipeline:
+
+```text
+Zigbang API
+     ↓
+AWS Lambda
+     ↓
+JSON Transformation
+     ↓
+Amazon RDS / MariaDB
+     ↓
+apart_sales_info
+     ↓
+DataGrip
+```
+
+The database contained the transformed apartment records retrieved from the API.
+
+### Key Data Fields
+
+| Field                 | Description            |
+| --------------------- | ---------------------- |
+| `id`                  | Apartment identifier   |
+| `name`                | Apartment name         |
+| `lat / lng`           | Location coordinates   |
+| `total_units`         | Number of households   |
+| `approval_date`       | Building approval date |
+| `sido / gugun / dong` | Location information   |
+| `min_sales_price`     | Minimum sales price    |
+| `max_sales_price`     | Maximum sales price    |
+| `avg_sales_price`     | Average sales price    |
+| `price_per_area`      | Price per area         |
+
+---
+
+## 9. Project Structure & Screenshots
+
+### Repository Structure
+
+```text
+serverless-apartment-data-pipeline/
+│
+├── README.md
+│
+├── lambda/
+│   └── lambda_function.py
+│
+├── screenshots/
+│   ├── 01-lambda-function.png
+│   ├── 02-lambda-test-success.png
+│   ├── 03-database-schema.png
+│   ├── 04-database-result.png
+│   └── 05-s3-deployment-package.png
+│
+└── .gitignore
+```
+
+### Screenshots
+
+#### AWS Lambda Function
+
+The Lambda function retrieves apartment data from the Zigbang API, transforms the JSON response, and inserts the data into Amazon RDS.
+
+![AWS Lambda Function](screenshots/01-lambda-function.png)
+
+#### Lambda Test Result
+
+The deployed Lambda function successfully executed the data ingestion process.
+
+![Lambda Test Success](screenshots/02-lambda-test-success.png)
+
+#### Database Schema
+
+The `apart_sales_info` table stores structured apartment and sales information.
+
+![Database Schema](screenshots/03-database-schema.png)
+
+#### Database Result
+
+The collected apartment data was successfully stored in Amazon RDS and verified using DataGrip.
+
+![Database Result](screenshots/04-database-result.png)
+
+#### S3 Deployment Package
+
+The Lambda deployment package containing the Python function and required dependencies was uploaded to Amazon S3.
+
+![S3 Deployment Package](screenshots/05-s3-deployment-package.png)
+
+---
+
+## 10. Project Outcome & Future Improvements
+
+### Project Outcome
+
+The final implementation successfully demonstrates an end-to-end serverless data ingestion workflow:
+
+```text
+External REST API
+       ↓
+AWS Lambda
+       ↓
+JSON Transformation
+       ↓
+SQL INSERT
+       ↓
+Amazon RDS / MariaDB
+       ↓
+Data Validation
+```
+
+Through this project, I gained hands-on experience with:
+
+* REST API data ingestion
+* JSON parsing and transformation
+* Relational database storage
+* SQL and MariaDB
+* AWS Lambda
+* Amazon RDS
+* Amazon S3
+* Python dependency management
+* Lambda deployment packages
+* Cloud-based data pipeline architecture
+* Troubleshooting cloud deployments
+
+### Future Improvements
+
+Potential improvements for a production-oriented version include:
+
+* **Scheduled Data Collection** — Use Amazon EventBridge to trigger Lambda automatically.
+* **Secure Credential Management** — Use AWS Secrets Manager or Parameter Store instead of hard-coded credentials.
+* **Duplicate Handling** — Implement `UPSERT` or duplicate detection.
+* **Monitoring** — Add CloudWatch Logs, Metrics, and Alarms.
+* **Data Quality Validation** — Validate missing IDs, invalid coordinates, prices, dates, and duplicate records.
+* **Analytics Dashboard** — Connect the database to Power BI for apartment price and geographic analysis.
+
+---
+
+## Conclusion
+
+This project demonstrates the migration of a traditional Python-based data collection script into a cloud-based serverless data pipeline.
+
+It provided practical experience in building an end-to-end ingestion workflow using **Python, REST APIs, SQL, AWS Lambda, Amazon RDS, Amazon S3, and Linux-based deployment workflows**.
