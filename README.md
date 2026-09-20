@@ -649,8 +649,9 @@ serverless-apartment-data-pipeline/
 ├── screenshots/
 │   ├── 01-lambda-function.png
 │   ├── 02-lambda-test-success.png
-│   ├── 03-rds-database.png
-│   └── 04-datagrip-result.png
+│   ├── 03-database-schema.png
+│   ├── 04-database-result.png
+│   └── 05-s3-deployment-package.png
 │
 └── .gitignore
 ```
