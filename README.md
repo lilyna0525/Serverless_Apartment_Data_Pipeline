@@ -852,6 +852,40 @@ Connect the database to Power BI to visualize:
 
 ---
 
+## Screenshots
+
+### 1. AWS Lambda Function
+
+The Lambda function retrieves apartment data from the Zigbang API, transforms the JSON response, and inserts the data into Amazon RDS.
+
+![AWS Lambda Function](screenshots/01-lambda-function.png)
+
+### 2. Lambda Test Result
+
+The deployed Lambda function was successfully executed and completed the data ingestion process.
+
+![Lambda Test Success](screenshots/02-lambda-test-success.png)
+
+### 3. Database Schema
+
+The `apart_sales_info` table in MariaDB contains structured apartment and sales information.
+
+![Database Schema](screenshots/03-database-schema.png)
+
+### 4. Database Result
+
+The collected apartment data was successfully stored in Amazon RDS and verified using DataGrip.
+
+![Database Result](screenshots/04-database-result.png)
+
+### 5. S3 Deployment Package
+
+The Lambda deployment package containing the Python function and required dependencies was uploaded to Amazon S3.
+
+![S3 Deployment Package](screenshots/05-s3-deployment-package.png)
+
+---
+
 # 25. Project Outcome
 
 The final implementation successfully demonstrates an end-to-end serverless data ingestion workflow:
